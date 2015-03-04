@@ -1,0 +1,15 @@
+#ignore .idea directory and all file within it
+.idea
+#ignore iml
+*.iml
+#ignore eclipse file
+.project
+.classpath
+.settings/
+.loadpath
+#gitignore bak file
+*.bak
+target/
+overlays/
+*.war
+*.jar
