@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel;
 
 /**
  * @ file_name NIOCopyFile.java
- * @ author liu.sheng.qi (liu.sheng.qi@fesco.com.cn)
+ * @ author liu.sheng.qi
  * @ date 2013-9-5上午9:46:22
  * @ description
  * @ reviewed_by 
@@ -26,7 +26,7 @@ public class NIOCopyFile {
 	 * @throws java.net.URISyntaxException
 	 * @throws java.io.IOException
 	 * @ void useMappedBufferCopy(NIOCopyFile)
-	 * @ author liu.sheng.qi (liu.sheng.qi@fesco.com.cn)
+	 * @ author liu.sheng.qi
 	 * @ date 2013-9-5上午9:47:03
 	 * @ description 使用内存映射直接Copy File
 	 * @ reviewed_by
@@ -57,7 +57,7 @@ public class NIOCopyFile {
 	 * @throws java.net.URISyntaxException
 	 * @throws java.io.IOException
 	 * @ void useChannerToChannel(NIOCopyFile)
-	 * @ author liu.sheng.qi (liu.sheng.qi@fesco.com.cn)
+	 * @ author liu.sheng.qi
 	 * @ date 2013-9-5上午9:49:25
 	 * @ description 使用Channel to Channel方式
 	 * @ reviewed_by
