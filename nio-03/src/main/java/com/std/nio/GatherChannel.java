@@ -45,6 +45,7 @@ public class GatherChannel {
 		while(gatherChannel.write(byteBuffers)>0){
 		}
 		System.out.println("全部写入文件:"+file);
+		gatherChannel.close();
 		fos.close();
 
 	}
