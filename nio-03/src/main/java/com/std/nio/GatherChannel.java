@@ -34,6 +34,10 @@ import java.util.Random;
  */
 public class GatherChannel {
 
+	private static String[] col1 = {"sence mile","duka lio","stake kila","lisa mike","chris nbone","huke curs"};
+	private static String[] col2 = {"microsoft","apple","google","alibaba","adobe","oracle"};
+	private static String[] col3 = {"washington","new york","landon","北京"};
+
 	public static void gatherWrite(ByteBuffer[] byteBuffers,String file) throws IOException {
 
 		FileOutputStream fos = new FileOutputStream(file);
@@ -49,7 +53,7 @@ public class GatherChannel {
 
 		FileOutputStream fos = new FileOutputStream("d:\\aa.txt");
 		GatheringByteChannel gatherChannel = fos.getChannel();
-		ByteBuffer[] byteBuffers = utterBS(strs);
+		ByteBuffer[] byteBuffers = utterBS();
 		while(gatherChannel.write(byteBuffers)>0){
 		}
 		System.out.println("全部写入文件:"+file);
@@ -57,10 +61,12 @@ public class GatherChannel {
 
 	}
 
-	private static ByteBuffer[] utterBS (String[] strs) throws UnsupportedEncodingException {
+	private static ByteBuffer[] utterBS () throws UnsupportedEncodingException {
 		List<ByteBuffer> byteBufferList = new ArrayList<>();
 		for(int i=0;i<5;i++){
-			byteBufferList.add(pickRandom(strs,"#"));
+			byteBufferList.add(pickRandom(col1,"#"));
+			byteBufferList.add(pickRandom(col2,"#"));
+			byteBufferList.add(pickRandom(col3,"#"));
 		}
 		ByteBuffer[] byteBuffers = new ByteBuffer[byteBufferList.size()];
 		byteBufferList.toArray(byteBuffers);
@@ -72,7 +78,9 @@ public class GatherChannel {
 		int total = string.length() + suffix.length( );
 		ByteBuffer buf = ByteBuffer.allocate (total*3);
 		buf.put (string.getBytes ("UTF-8"));
-		buf.put (suffix.getBytes ("UTF-8")); buf.flip( ); return (buf);
+		buf.put (suffix.getBytes ("UTF-8"));
+		buf.flip( );
+		return (buf);
 	}
 
 }
