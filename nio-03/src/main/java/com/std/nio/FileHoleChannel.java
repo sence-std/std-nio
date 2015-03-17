@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 
 /**
  *
@@ -47,6 +48,10 @@ public class FileHoleChannel {
 		putData(0,byteBuffer,channel);
 		putData(4000,byteBuffer,channel);
 		putData(50000000,byteBuffer,channel);
+		/**
+		 * force 指将文件的修改强制写入到磁盘，false为不修改文件的metadata(文件所有者，访问权限，最后修改时间等)
+		 */
+		channel.force(false);
 		channel.close();
 		raf.close();
 	}
@@ -77,5 +82,45 @@ public class FileHoleChannel {
 		System.out.println("after truncate file size is:"+channel.size());
 		raf.close();
 		channel.close();
+	}
+
+	public static String readFile(String fileName,Long position) throws IOException {
+		File file = new File(fileName);
+		if(!file.exists()){
+			return null;
+		}
+		if(position == null){
+			position = 0L;
+		}
+		RandomAccessFile raf = new RandomAccessFile(file,"r");
+		FileChannel channel = raf.getChannel();
+		//设置文件锁 共享锁和独占锁 是操作系统文件底层来实现的
+		FileLock lock = channel.tryLock(position,channel.size()-position,true);
+		if(lock!=null) {
+			try{
+				ByteBuffer byteBuffer = ByteBuffer.allocate(200);
+				byteBuffer.clear();
+				int length = channel.read(byteBuffer, position);
+				if (length > 0) {
+					byteBuffer.flip();
+					byte[] bytes = new byte[200];
+					byteBuffer.get(bytes, 0, byteBuffer.remaining());
+					//字节码文件 UTF-8每个字符站三个字字节位，所以不能使用 char视图
+					return new String(bytes, "UTF-8");
+				} else {
+					return null;
+				}
+			}catch (Exception e){
+				throw new IOException(e.getMessage());
+			}finally {
+				lock.release();
+				channel.close();
+				raf.close();
+			}
+
+		}else{
+			return "文件已经被锁定";
+		}
+
 	}
 }

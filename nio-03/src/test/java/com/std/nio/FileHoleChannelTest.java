@@ -44,5 +44,11 @@ public class FileHoleChannelTest {
 		FileHoleChannel.truncate(fileName, 4050L);
 	}
 
+	@Test
+	public void testRead() throws IOException {
+		String fileName = "d:\\aa.txt";
+		String str = FileHoleChannel.readFile(fileName, 110L);
+		System.out.println(str);
+	}
 
 }
