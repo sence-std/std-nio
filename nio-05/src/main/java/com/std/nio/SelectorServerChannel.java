@@ -82,11 +82,6 @@ public class SelectorServerChannel {
 		System.out.println("channel:"+channel);
 		int count = 0;
 		byteBuffer.clear();
-//		try {
-//			Thread.sleep(100000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
 		while((count=channel.read(byteBuffer))>0){
 			System.out.println(count);
 			byteBuffer.flip();
