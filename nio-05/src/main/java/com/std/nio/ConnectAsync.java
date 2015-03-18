@@ -32,7 +32,6 @@ import java.nio.channels.SocketChannel;
  */
 public class ConnectAsync {
 
-	public static final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
 
 	public void initSocket(int port,boolean isBlock) throws IOException {
 
@@ -40,22 +39,23 @@ public class ConnectAsync {
 		sc.configureBlocking(isBlock);
 		sc.connect(new InetSocketAddress("127.0.0.1",port));
 		while(!sc.finishConnect()){
-			System.out.println("not connect yet...");
+		//	System.out.println("not connect yet...");
 		}
 		FileInputStream in = new FileInputStream("D:\\std\\x.txt");
 		FileChannel channel = in.getChannel();
 		channel.transferTo(0,channel.size(),sc);
-		int count = 0;
 		byte[] originBytes = new byte[0];
+		final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
+		byteBuffer.clear();
 		//如果sc是非阻塞的模式，返回-1才是到了结束了 -1 表示通道断了
-		while((count = sc.read(byteBuffer))>=0){
+		while( sc.read(byteBuffer)>=0){
 			byteBuffer.flip();
 			byte[] bytes = new byte[byteBuffer.remaining()];
 			byteBuffer.get(bytes,0,byteBuffer.remaining());
 			originBytes = mergeArray(bytes,originBytes);
 			byteBuffer.clear();
 		}
-		System.out.println(new String(originBytes,"UTF-8"));
+		//System.out.println(new String(originBytes,"UTF-8"));
 		sc.close();
 	}
 

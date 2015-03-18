@@ -44,30 +44,30 @@ public class SelectorServerChannel {
 		Selector selector = Selector.open();
 		ssc.register(selector, SelectionKey.OP_ACCEPT);
 		while (true){
-			System.out.println("start select...");
+			//System.out.println("start select...");
 			//返回就绪的IO通道数量
 			int select  = selector.select();
 			if(select==0){
-				System.out.println("had not selected...");
+				//System.out.println("had not selected...");
 				continue;
 			}
 			Set<SelectionKey> keys = selector.selectedKeys();
-			System.out.println("selected key size:"+keys.size());
+			//System.out.println("selected key size:"+keys.size());
 			Iterator<SelectionKey> iterator = keys.iterator();
 			while (iterator.hasNext()){
-				System.out.println("do iterator...");
+				//System.out.println("do iterator...");
 				SelectionKey key  = iterator.next();
 				if(key.isAcceptable()){
-					System.out.println("do accept...");
+					//System.out.println("do accept...");
 					ServerSocketChannel serverSocketChannel = (ServerSocketChannel)key.channel();
 					SocketChannel socketChannel = serverSocketChannel.accept();
-					System.out.println("channel:"+socketChannel);
+					//System.out.println("channel:"+socketChannel);
 					registerChannel(socketChannel,selector,SelectionKey.OP_READ);
 					//作者 这里处理了 socketChannel 比较奇怪
 					sayHello(socketChannel);
 				}
 				if(key.isReadable()){
-					System.out.println("do read...");
+					//System.out.println("do read...");
 					readDataFromSocket(key);
 				}
 				iterator.remove();
@@ -79,18 +79,18 @@ public class SelectorServerChannel {
 
 	private void readDataFromSocket (SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel)key.channel();
-		System.out.println("channel:"+channel);
+		//System.out.println("channel:"+channel);
 		int count = 0;
 		byteBuffer.clear();
 		while((count=channel.read(byteBuffer))>0){
-			System.out.println(count);
+			//System.out.println(count);
 			byteBuffer.flip();
 			while(byteBuffer.hasRemaining()){
 				channel.write(byteBuffer);
 			}
 			byteBuffer.clear();
 		}
-		System.out.println("count:"+count);
+		//System.out.println("count:"+count);
 		if(count<=0) {
 			channel.close();
 		}
