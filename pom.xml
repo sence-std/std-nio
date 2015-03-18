@@ -11,6 +11,8 @@
     <modules>
         <module>nio-01</module>
         <module>nio-02</module>
+        <module>nio-04</module>
+        <module>nio-05</module>
         <module>nio-03</module>
     </modules>
 
