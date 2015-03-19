@@ -29,8 +29,8 @@ import java.util.concurrent.Semaphore;
  */
 public class ExecutorTest {
 
-	private static int thread_num = 100;
-	private static int client_num = 1000;
+	private static int thread_num = 400;
+	private static int client_num = 3000;
 
 	public static void main(String[] args) {
 		ExecutorService exec = Executors.newCachedThreadPool();

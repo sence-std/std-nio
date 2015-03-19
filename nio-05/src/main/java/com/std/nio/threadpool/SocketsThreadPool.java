@@ -9,6 +9,13 @@
  */
 package com.std.nio.threadpool;
 
+import com.std.nio.SelectorServerChannel;
+
+import java.io.IOException;
+import java.nio.channels.SelectionKey;
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  *
  * <p>线程池</p>
@@ -23,14 +30,56 @@ package com.std.nio.threadpool;
  * @since 1.0
  * @version 1.0
  */
-public class SocketsThreadPool {
+public class SocketsThreadPool extends SelectorServerChannel {
 
-	public static final int MAX_THREAD_NUM = 5;
+	public static final int MAX_THREAD_NUM = 4;
+	public ThreadPool pool = new ThreadPool(MAX_THREAD_NUM);
 
-	public SocketsThreadPool(){
-
-
+	public void readDataFromSocket (SelectionKey key) throws IOException {
+		WorkerThread worker = pool.getWorker();
+		while(worker==null){
+			worker = pool.getWorker();
+		}
+		worker.serviceChannel(key);
 	}
 
+
+	class ThreadPool{
+		List<WorkerThread> idle = new LinkedList<>();
+
+		ThreadPool(int poolSize){
+			for(int i=0;i<poolSize;i++){
+				WorkerThread workerThread = new WorkerThread(this);
+				workerThread.setName("Worker-"+i);
+				workerThread.start();
+				idle.add(workerThread);
+			}
+		}
+
+		/**
+		 * 得到一个工作线程，由于是多线程访问需要做同步 防止两个线程同时取到用一个工作线程
+		 * @return
+		 */
+		WorkerThread getWorker(){
+			WorkerThread worker = null;
+			synchronized (idle){
+				if(idle.size()>0){
+					worker = (WorkerThread)idle.remove(0);
+				}
+			}
+			return worker;
+		}
+
+		/**
+		 * 返回工作线程
+		 * @param worker
+		 */
+		void returnWorker(WorkerThread worker){
+			synchronized (idle) {
+				idle.add(worker);
+			}
+		}
+
+	}
 
 }

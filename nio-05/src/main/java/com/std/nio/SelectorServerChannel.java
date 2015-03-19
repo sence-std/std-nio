@@ -77,7 +77,7 @@ public class SelectorServerChannel {
 
 	private static final ByteBuffer byteBuffer = ByteBuffer.allocateDirect(1024);
 
-	private void readDataFromSocket (SelectionKey key) throws IOException {
+	public void readDataFromSocket (SelectionKey key) throws IOException {
 		SocketChannel channel = (SocketChannel)key.channel();
 		//System.out.println("channel:"+channel);
 		int count = 0;
