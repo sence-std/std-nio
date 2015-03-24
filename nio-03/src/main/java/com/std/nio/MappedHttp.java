@@ -68,6 +68,7 @@ public class MappedHttp {
 			contentLength = channel.size();
 			contentType = URLConnection.guessContentTypeFromName(filePath);
 		}catch (IOException e){
+				//wrap不需要用
 				gather[0] = ByteBuffer.wrap(HTTP_404_DHR.getBytes("UTF-8"));
 		 		String msg404 = MSG_404+e+HTTP_LINE_SEP;
 				gather[2] = ByteBuffer.wrap(msg404.getBytes("UTF-8"));

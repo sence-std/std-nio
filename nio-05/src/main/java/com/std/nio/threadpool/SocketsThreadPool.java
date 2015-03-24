@@ -64,7 +64,7 @@ public class SocketsThreadPool extends SelectorServerChannel {
 			WorkerThread worker = null;
 			synchronized (idle){
 				if(idle.size()>0){
-					worker = (WorkerThread)idle.remove(0);
+					worker = idle.remove(0);
 				}
 			}
 			return worker;
