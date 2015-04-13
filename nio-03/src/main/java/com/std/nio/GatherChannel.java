@@ -20,7 +20,10 @@ import java.util.Random;
 
 /**
  *
- * <p>NIO gather 聚合写入多个Buffer</p>
+ * <p>
+ *     NIO gather 聚合多个Buffer
+ * 	   写出
+ * </p>
  *
  * <PRE>
  * <BR>	修改记录
