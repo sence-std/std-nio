@@ -17,19 +17,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
 
 /**
  *
- * <p>RPC 框架核心</p>
+ * <p>
+ *	   这里还不能使用NIO Channel 因为ObjectOutputStream ObjectInputStream流都是阻塞的，发挥不了异步的优势，使用没有意义
+ *     RPC 框架核心
+ * </p>
  *
  * <PRE>
  * <BR>	修改记录
@@ -61,90 +58,22 @@ public class RpcFramework {
 		if(service == null){
 			throw new IllegalArgumentException("service is null");
 		}
-		ServerSocketChannel ssc = ServerSocketChannel.open();
+		ServerSocket ssc = new ServerSocket();
 		SocketAddress socketAddress = new InetSocketAddress(host,port);
 		ssc.bind(socketAddress);
-		ssc.configureBlocking(true);
-		Selector selector = Selector.open();
-		ssc.register(selector, SelectionKey.OP_ACCEPT);
 		while (true){
-			int select = selector.select();
-			if(select==0){
-				continue;
-			}
-			Set<SelectionKey> keys = selector.selectedKeys();
-			Iterator<SelectionKey> iterator = keys.iterator();
-			while (iterator.hasNext()){
-				SelectionKey key = iterator.next();
-				if(key.isAcceptable()){
-					ServerSocketChannel serverSocketChannel = (ServerSocketChannel)key.channel();
-					SocketChannel socketChannel = serverSocketChannel.accept();
-					key.cancel();
-					selector.selectNow();
-					registerSocketChannel(socketChannel,selector,SelectionKey.OP_READ);
-				}
-				if(key.isReadable()){
-					readDataDoService(service, key);
-				}
-				iterator.remove();
-			}
-		}
-	}
-
-	/**
-	 *
-	 * @param service
-	 * @param key
-	 */
-	private static void readDataDoService (Object service, SelectionKey key)
-			throws IOException, ClassNotFoundException, NoSuchMethodException, InvocationTargetException,
-			IllegalAccessException {
-		SocketChannel socketChannel = null;
-		Socket socket = null;
-		ObjectInputStream in = null;
-		ObjectOutputStream out = null;
-		try {
-			socketChannel = (SocketChannel) key.channel();
-			socket = socketChannel.socket();
-		    in = new ObjectInputStream(socket.getInputStream());
+			Socket socket = ssc.accept();
+			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
 			String methodName = in.readUTF();
 			Class<?>[] parameterTypes = (Class<?>[])in.readObject();
 			Object[] parameters = (Object[])in.readObject();
 			Method method = service.getClass().getMethod(methodName,parameterTypes);
 			Object result = method.invoke(service,parameters);
-			out = new ObjectOutputStream(socket.getOutputStream());
+			ObjectOutputStream out  = new ObjectOutputStream(socket.getOutputStream());
 			out.writeObject(result);
-		}catch (Exception e){
-			throw e;
-		}finally {
-			if(in != null){
-				in.close();
-			}
-			if(out != null){
-				out.close();
-			}
-			if(socket != null){
-				socket.close();
-			}
-			if(socketChannel != null){
-				socketChannel.close();
-			}
+			out.flush();
+			socket.close();
 		}
-	}
-
-	/**
-	 * 注册socketchannel
-	 * @param channel
-	 * @param selector
-	 * @param opRead
-	 * @throws ClosedChannelException
-	 */
-	private static void registerSocketChannel (SocketChannel channel, Selector selector,int opRead) throws IOException {
-		if(channel == null){
-			return;
-		}
-		channel.configureBlocking(true);
-		channel.register(selector,opRead);
 	}
 
 	/**
@@ -167,37 +96,26 @@ public class RpcFramework {
 		return (T)Proxy.newProxyInstance(interfaceClass.getClassLoader(),new Class<?>[]{interfaceClass},new InvocationHandler() {
 			@Override
 			public Object invoke (Object proxy, Method method, Object[] args) throws Throwable {
-				SocketChannel sc = null;
-				ObjectOutputStream out = null;
-				ObjectInputStream input = null;
+				Socket socket = null;
 				try {
-					sc = SocketChannel.open();
-					sc.configureBlocking(true);
-					sc.connect(new InetSocketAddress(host,port));
-					while(!sc.finishConnect()){
-					}
-					Socket socket = sc.socket();
-					out = new ObjectOutputStream(socket.getOutputStream());
+					socket = new Socket();
+					socket.connect(new InetSocketAddress(host,port));
+					ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
 					out.writeUTF(method.getName());
 					out.writeObject(method.getParameterTypes());
 					out.writeObject(args);
-					input = new ObjectInputStream(socket.getInputStream());
-					Object obj = input.readObject();
+					out.flush();
+					ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+					Object obj = in.readObject();
 					if(obj instanceof Throwable){
-						throw (Throwable)obj;
+						return obj;
 					}
 					return obj;
 				}catch (Exception  e){
 					throw  e;
 				}finally {
-					if(out == null){
-						out.close();
-					}
-					if(input == null){
-						input.close();
-					}
-					if(sc == null){
-						sc.close();
+					if(socket == null){
+						socket.close();
 					}
 				}
 			}

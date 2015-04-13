@@ -37,6 +37,7 @@ public class HelloServiceRpcConsumer {
 	public void doConsumer() throws IOException {
 		IHelloService helloService = RpcFramework.refer(IHelloService.class, "127.0.0.1", 8888);
 		Hello hello = helloService.sayHello("sence","hello");
+		System.out.print(hello);
 	}
 
 }
